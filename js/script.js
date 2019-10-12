@@ -5,20 +5,52 @@ FSJS project 2 - List Filter and Pagination
 
 // Study guide for this project - https://drive.google.com/file/d/1OD1diUsTMdpfMDv677TfL1xO2CEkykSz/view?usp=sharing
 
-/*** 
-   Add your global variables that store the DOM elements you will 
-   need to reference and/or manipulate. 
-   
-   But be mindful of which variables should be global and which 
-   should be locally scoped to one of the two main functions you're 
-   going to create. A good general rule of thumb is if the variable 
-   will only be used inside of a function, then it can be locally 
-   scoped to that function.
-***/
-// =-=-=-=-=-=-=-=-=-= GLOBAL VARIABLES =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// =-=-=-=-=-=-=-=-=-= GLOBAL VARIABLES =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 let students = document.querySelectorAll(".cf");
-// +++++++++++++++++++++++++++++++++++++++++
-let temp_page = 5;
+
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+function howManyPages() {
+  // determine how many buttons we need by dividing and rounding up
+  let buttons = Math.ceil(students.length / 10);
+  //   console.log(students.length);
+  //   console.log(buttons);
+
+  // this returns the number of buttons we'll need
+  return buttons;
+}
+
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+function showPageButtons(numberOfButtons) {
+  // initialize the variables
+  let finalMarkup = "";
+  let listMarkup = "";
+  let paginationMarkup = "";
+
+  for (let i = 1; i <= numberOfButtons; i++) {
+    // build the <li> tags
+    listMarkup = `
+    <li>
+      <a href="#">${i}</a>
+    </li>`;
+    // accumulate the markup
+    paginationMarkup += listMarkup;
+  }
+
+  // create the final HTML and drop the <li> business in the middle
+  finalMarkup = `
+   <div class="pagination">
+      <ul>
+         ${paginationMarkup}
+      </ul>
+   </div>`;
+
+  // insertthe HTML in the right spot
+  document
+    .querySelector(".student-list")
+    .insertAdjacentHTML("afterend", finalMarkup);
+  // set the first button to active
+  document.querySelector(".pagination ul li a").classList.add("active");
+}
 
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 function showSearch() {
@@ -43,19 +75,8 @@ function showPage(page) {
   display_first = page * 10 - 10;
   display_last = display_first + 11;
 
-  /***
-
-   Pro Tips: 
-     - Keep in mind that with a list of 54 students, the last page 
-       will only display four.
-     - Remember that the first student has an index of 0.
-     - Remember that a function `parameter` goes in the parens when 
-       you initially define the function, and it acts as a variable 
-       or a placeholder to represent the actual function `argument` 
-       that will be passed into the parens later when you call or 
-       "invoke" the function 
-***/
-
+  // show the ones in the correct range
+  // hide the ones outside of that range
   for (let i = 1; i < students.length; i++) {
     if (i > display_first && i < display_last) {
       students[i].style.display = "list-item";
@@ -69,8 +90,27 @@ function showPage(page) {
    Create the `appendPageLinks function` to generate, append, and add 
    functionality to the pagination buttons.
 ***/
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+function buttonClick() {
+  // listen for clicks
+  document.addEventListener("click", event => {
+    // if an anchor tag is clicked
+    // send the showPage function the button that was clicked
+    if (event.target.tagName == "A") {
+      showPage(event.target.innerText);
+      // turn off all active class
+      // then turn it back on for the button
+      // that was clicked
+      a = document.querySelectorAll("a");
+      for (let i = 0; i < a.length; i++) {
+        a[i].classList.remove("active");
+        event.target.classList.add("active");
+      }
+    }
+  });
+}
 
-// Remember to delete the comments that came with this file, and replace them with your own code comments.
+// ========================================================================
 function colorCode() {
   // this temporary function color codes the names so you can see
   // that you have selected the correct ten
@@ -92,13 +132,21 @@ function colorCode() {
     }
   }
 }
-// +_+_+_+_+_+_+_+_+_+_+_+_+_+ TESTING +_+_+_+_+_+_+_+_+_+_=
-showSearch();
-showPage(temp_page); // temporary hard code var
-colorCode();
 
-/* 
-Build and insert generated HTML into DOM
-When clicked Pass innerText to pagination function (showPage)
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//  Place all the function calls in one place. I just like it like that
+function main() {
+  let numberOfButtons = howManyPages();
 
-*/
+  showSearch();
+  showPage(1); // start up page = 1. Could be a variable I guess
+  showPageButtons(numberOfButtons);
+  buttonClick();
+
+  // ++++++++++++++++ FOR DEBUG ONLY - TEMPORARY +++++++
+  //   colorCode(); // remove before submission
+  //+++++++++++++++++++++++++++++++++++++++++++++++
+}
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// ========== BEGIN HERE ==========
+main();
