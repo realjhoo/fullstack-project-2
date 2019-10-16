@@ -10,7 +10,7 @@ const startPage = 1;
 
 // =======================================================================
 function colorCode() {
-  // DEBUGGING
+  // DEBUGGING ONLY
 
   for (let i = 1; i < students.length; i++) {
     if (i > 0 && i < 11) {
@@ -51,8 +51,8 @@ function howManyPages(array) {
 // ========================================================================
 function createPageButtons(buttons) {
   let liMarkup = "";
-  //   let buildLiMarkup = "";
 
+  // gin up the <li> items
   for (let i = 1; i <= buttons; i++) {
     let buildLiMarkup = `
       <li>
@@ -61,6 +61,7 @@ function createPageButtons(buttons) {
     liMarkup += buildLiMarkup;
   }
 
+  // drop the <li> items into the HTML
   let finalMarkup = `
   <div class="pagination">
     <ul>
@@ -68,6 +69,7 @@ function createPageButtons(buttons) {
     </ul>
   </div>`;
 
+  // insert in the DOM and set the active button
   document
     .querySelector(".student-list")
     .insertAdjacentHTML("afterend", finalMarkup);
@@ -77,6 +79,7 @@ function createPageButtons(buttons) {
 
 // ========================================================================
 function pageButtonListener() {
+  // EVENT LISTENER for Page Buttons
   document.addEventListener("click", event => {
     if (event.target.tagName === "A") {
       // paginate!
@@ -92,21 +95,24 @@ function pageButtonListener() {
 }
 
 // ========================================================================
-function paginate(numOfPages, array) {
-  let displayFirst = numOfPages * 10 - 10;
+function paginate(pageToShow, nodelist) {
+  // break node list into 10s and show the selected page
+  let displayFirst = pageToShow * 10 - 10;
   let displayLast = displayFirst + 11;
 
-  for (i = 1; i < array.length; i++) {
+  // loop over - show the desired 10, hide the rest
+  for (let i = 1; i < nodelist.length; i++) {
     if (i > displayFirst && i < displayLast) {
-      array[i].style.display = "list-item";
+      nodelist[i].style.display = "list-item";
     } else {
-      array[i].style.display = "none";
+      nodelist[i].style.display = "none";
     }
   }
 }
 
 // ========================================================================
 function searchButtonListener() {
+  // EVENT LISTENER for Search Button
   let searchButton = document.getElementsByTagName("button");
 
   searchButton[0].addEventListener("click", event => {
@@ -116,6 +122,8 @@ function searchButtonListener() {
 
 // ========================================================================
 function searchInputListener() {
+  // EVENT LISTENER for Search Input
+  // TODO: Live Search
   let searchInput = document.getElementsByTagName("input");
 
   searchInput[0].addEventListener("keypress", event => {
@@ -127,47 +135,74 @@ function searchInputListener() {
 
 // ========================================================================
 function searchNames() {
+  // Compare names with search string
+  // set visibility for matches
+  // send to paginate
+
   let studentNames = [];
   let cleanStudentNames = [];
   let h3Names = document.querySelectorAll("h3");
   let searchString = document.querySelector("input").value;
 
+  // the student names live in <h3> tags. Variable h3Names is a node list
+  // variable studentNames extracts the actual names from the code
+  // studentNames is an array
   for (i = 0; i < h3Names.length; i++) {
+    // clear .visible class from any previous runs of this function
+    let invisible = document.querySelectorAll(".visible");
+    h3Names[i].classList.remove("visible");
+
     studentNames[i] = h3Names[i].innerText;
 
+    // compare search text (extracted from input box) wuth the names extracted from <h3>
     let searchStringIsInStudentNames = studentNames[i].includes(searchString);
 
+    // if the search string is in the text, set the <h3> to be seen
+    // otherwise, hide it. Fix border. Add class for passing to paginate()
     if (searchStringIsInStudentNames) {
       h3Names[i].parentElement.parentElement.style.display = "block";
       h3Names[i].parentElement.parentElement.style.borderBottom =
         "1px solid #eaeaea;";
+      // this makes a clean array with no null or undefined elements
+      // which were causing errors in array.length
       cleanStudentNames.push(studentNames[i]);
+      h3Names[i].classList.add("visible"); //+++++++
     } else {
       h3Names[i].parentElement.parentElement.style.display = "none";
       h3Names[i].parentElement.parentElement.style.borderBottom = "none";
     }
   }
 
+  // clear off the old page buttons - make the new page buttons
   removePageButtons();
   let numberOfButtons = howManyPages(cleanStudentNames);
   createPageButtons(numberOfButtons);
 
-  // this function needs to pass a Node List, not an Array!
-  // can we walk the DOM and build a node list of visible block list items?
-  // could convert the param to an integer, and pass the length, instead of
-  // determining the length in paginate?? NO. the function needs the nodes
-  // to calculate which list-items to show or hide
-  //   paginate(startPage, cleanStudentNames);
+  // create a nodelist to pass to paginate
+  let visible = document.querySelectorAll(".visible");
+  //   console.log(visible.length);
+
+  // ****************************************************************
+  // paginate() works on initial call... but not from here
+  // h3 is hiding names <h3> of students 11 - end who should be visible
+  // i.e., only showing names for studnets 1-11 on search.
+  // This shows the bug is in paginate()
+  paginate(startPage, visible);
+
+  // ****************************************************************
 }
 
 // ========================================================================
 function removePageButtons() {
+  // destroy page buttons so they dont accumulate
   let removeButtons = document.querySelector(".pagination");
   removeButtons.parentNode.removeChild(removeButtons);
 }
 
 // ========================================================================
 function main() {
+  //  function calls are kept here because I dont like loose code
+  // rolling around outside of boxes
   colorCode();
   createSearchButtons();
   let numberOfButtons = howManyPages(students);
