@@ -5,7 +5,8 @@ FSJS project 2 - List Filter and Pagination
 
 // GLOBAL VARS
 // =======================================================================
-let students = document.querySelectorAll(".cf");
+const students = document.querySelectorAll(".cf");
+
 const startPage = 1;
 
 // =======================================================================
@@ -100,6 +101,8 @@ function paginate(pageToShow, nodelist) {
   let displayFirst = pageToShow * 10 - 10;
   let displayLast = displayFirst + 11;
 
+  nodelist[0].style.display = ""; // force display of Q guy????
+
   // loop over - show the desired 10, hide the rest
   for (let i = 1; i < nodelist.length; i++) {
     if (i > displayFirst && i < displayLast) {
@@ -135,61 +138,97 @@ function searchInputListener() {
 
 // ========================================================================
 function searchNames() {
-  // Compare names with search string
-  // set visibility for matches
-  // send to paginate
-
   let studentNames = [];
   let cleanStudentNames = [];
   let h3Names = document.querySelectorAll("h3");
   let searchString = document.querySelector("input").value;
+  let newArray = [];
+  var ctr = 0;
 
-  // the student names live in <h3> tags. Variable h3Names is a node list
-  // variable studentNames extracts the actual names from the code
-  // studentNames is an array
   for (i = 0; i < h3Names.length; i++) {
-    // clear .visible class from any previous runs of this function
-    let invisible = document.querySelectorAll(".visible");
-    h3Names[i].classList.remove("visible");
+    // hide the list
+    //add the 1 because 0 is the title element for some reason
+    students[i + 1].style.display = "none";
 
+    //extract the text names to compare
     studentNames[i] = h3Names[i].innerText;
 
-    // compare search text (extracted from input box) wuth the names extracted from <h3>
+    // compare the names
     let searchStringIsInStudentNames = studentNames[i].includes(searchString);
+    console.log(searchStringIsInStudentNames);
 
-    // if the search string is in the text, set the <h3> to be seen
-    // otherwise, hide it. Fix border. Add class for passing to paginate()
+    // if the search is in there, store in new array
     if (searchStringIsInStudentNames) {
-      h3Names[i].parentElement.parentElement.style.display = "block";
-      h3Names[i].parentElement.parentElement.style.borderBottom =
-        "1px solid #eaeaea;";
-      // this makes a clean array with no null or undefined elements
-      // which were causing errors in array.length
+      // craete clean array
+      newArray.push(students[i + 1]);
+      ctr++; // use ctr to avoid null entries
+      console.log(newArray);
+
+      /*
+      If the search text has a match, the <li> that the h3 lives in
+      should be added to an array, so it can be pushed back into DOM
+      The currently displayed list should be set to display none
+      The new list needs a class so it can be easily removed
+      and the original list returned
+      How to build HTML node list??? 
+      */
       cleanStudentNames.push(studentNames[i]);
-      h3Names[i].classList.add("visible"); //+++++++
-    } else {
-      h3Names[i].parentElement.parentElement.style.display = "none";
-      h3Names[i].parentElement.parentElement.style.borderBottom = "none";
     }
   }
-
-  // clear off the old page buttons - make the new page buttons
+  // *********** * * * ** * * * * ** * * * *
+  // PASS THE ARRAY NAME TO THE PAGE BUTTONS SO
+  // THEY CAN SHOW THE COTRECT ARRAY LINE 87!!!!!!!
   removePageButtons();
   let numberOfButtons = howManyPages(cleanStudentNames);
   createPageButtons(numberOfButtons);
+  paginate(startPage, newArray);
+}
 
-  // create a nodelist to pass to paginate
-  let visible = document.querySelectorAll(".visible");
-  //   console.log(visible.length);
+// ========================================================================
+function OLDsearchNames() {
+  let studentNames = [];
+  let displayStudentNames = [];
 
-  // ****************************************************************
-  // paginate() works on initial call... but not from here
-  // h3 is hiding names <h3> of students 11 - end who should be visible
-  // i.e., only showing names for studnets 1-11 on search.
-  // This shows the bug is in paginate()
-  paginate(startPage, visible);
+  let searchString = document.querySelector("input").value;
+  let h3Names = document.querySelectorAll("h3");
 
-  // ****************************************************************
+  for (let i = 0; i < h3Names.length; i++) {
+    studentNames[i] = h3Names[i].innerText;
+
+    let searchStringIsInStudentNames = studentNames[i].includes(searchString);
+
+    // compared to name list
+    // if match is found
+    // add that entire li to a new list
+    // counter will cause null spots in new list.
+    if (searchStringIsInStudentNames) {
+      displayStudentNames.push(students[i]);
+      // displaysturntnames is returning a useless object and not HTML markup
+      // I need **MARKUP** to insert into the DOM
+    }
+  }
+
+  console.log(displayStudentNames);
+  // this will be a function ********************
+  // THIS REMOVES ALL THE NAMES
+  /*
+  let e = document.querySelector(".student-list");
+  let child = e.lastElementChild;
+  while (child) {
+    e.removeChild(child);
+    child = e.lastElementChild;
+  }
+  */
+
+  // add the list we created to the DOM
+
+  // remove currennt display names
+  // insert new list of display names into DOM
+  // ---------- do I have to rebuild the HTML???
+  // removePageButtons
+  // calc the number of buttons now needed
+  // create the new page buttons
+  // call paginate
 }
 
 // ========================================================================
