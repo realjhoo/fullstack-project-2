@@ -7,13 +7,13 @@ FSJS project 2 - List Filter and Pagination
 // =======================================================================
 const students = document.querySelectorAll(".student-item");
 const startPage = 1;
-const numberOfPages = 10; // <-- NEW VAR
+const numberOfPages = 10;
 let cleanStudentNames = [];
+
 // =======================================================================
 function colorCode() {
   // DEBUGGING ONLY
   for (let i = 0; i < students.length; i++) {
-    console.log("WTF");
     if (i < 10) {
       students[i].style.backgroundColor = "darkred";
     } else if (i < 20) {
@@ -33,7 +33,7 @@ function colorCode() {
 // =======================================================================
 function createSearchButtons() {
   // gin up the markup
-  let buttonMarkup = `<div class="student-search">
+  const buttonMarkup = `<div class="student-search">
   <input placeholder="Search for students...">
       <button>Search</button>
       </div>`;
@@ -43,10 +43,9 @@ function createSearchButtons() {
 }
 
 // ========================================================================
-// pass array.length into this as an integer
-function howManyPages(length) {
+function howManyPages(arrayLength) {
   // divide the number of students by 10 and return the result
-  let buttons = Math.ceil(length / numberOfPages);
+  let buttons = Math.ceil(arrayLength / numberOfPages);
   return buttons;
 }
 
@@ -64,7 +63,7 @@ function createPageButtons(buttons) {
   }
 
   // drop the <li> items into the HTML
-  let finalMarkup = `
+  const finalMarkup = `
   <div class="pagination">
     <ul>
       ${liMarkup}
@@ -76,12 +75,11 @@ function createPageButtons(buttons) {
     .querySelector(".student-list")
     .insertAdjacentHTML("afterend", finalMarkup);
 
-  x = document.querySelector(".pagination ul li a");
-  if (x) {
-    console.log("Yup");
+  // if there is no <a>, there were no results, so show error msg
+  let aTagExists = document.querySelector(".pagination ul li a");
+  if (aTagExists) {
     document.querySelector(".pagination ul li a").classList.add("active");
   } else {
-    console.log("nope");
     showErrorMsg();
   }
 }
@@ -91,18 +89,16 @@ function pageButtonListener() {
   // EVENT LISTENER for Page Buttons
   document.addEventListener("click", event => {
     if (event.target.tagName === "A") {
-      let hasClass = document.querySelector(".search");
-      console.log(
-        "Has Class " + hasClass + " innerText: " + event.target.innerText
-      );
+      let isSearch = document.querySelector(".search");
+
       // paginate with correct array - searched or unsearched
-      if (hasClass) {
-        paginate(event.target.innerText, cleanStudentNames); // <-- array
+      if (isSearch) {
+        paginate(event.target.innerText, cleanStudentNames); // <-- search array
       } else {
-        paginate(event.target.innerText, students); // <-- array
+        paginate(event.target.innerText, students); // <-- not search array
       }
 
-      // remove all .active then add for clicked button
+      // set .actice for clicked button
       a = document.querySelectorAll("a");
       for (let i = 0; i < a.length; i++) {
         a[i].classList.remove("active");
@@ -131,7 +127,7 @@ function paginate(pageToShow, nodelist) {
 // ========================================================================
 function searchButtonListener() {
   // EVENT LISTENER for Search Button
-  let searchButton = document.getElementsByTagName("button");
+  const searchButton = document.getElementsByTagName("button");
 
   searchButton[0].addEventListener("click", event => {
     searchNames();
@@ -141,8 +137,9 @@ function searchButtonListener() {
 // ========================================================================
 function searchInputListener() {
   // EVENT LISTENER for Search Input
-  let searchInput = document.getElementsByTagName("input");
+  const searchInput = document.getElementsByTagName("input");
 
+  // ENTER activates search
   searchInput[0].addEventListener("keypress", event => {
     if (event.keyCode === 13) {
       searchNames();
@@ -152,19 +149,18 @@ function searchInputListener() {
 
 // ========================================================================
 function searchNames() {
-  let studentNames = [];
+  let studentNames = []; // <-- holds innertext of names
   let searchStringIsInStudentNames;
 
-  let h3Names = document.querySelectorAll("h3");
+  let h3Names = document.querySelectorAll("h3"); // <-- holds names in html
   let searchString = document.querySelector("input").value.toLowerCase();
   let ctr = 0; // <-- counter variable
-  cleanStudentNames = [];
+  cleanStudentNames = []; // <-- holds the search array
+
   // hide all list items - extract text and compare - push to new array
   for (let i = 0; i < h3Names.length; i++) {
     students[i].style.display = "none";
-
     studentNames[i] = h3Names[i].innerText;
-
     searchStringIsInStudentNames = studentNames[i].includes(searchString);
 
     if (searchStringIsInStudentNames) {
@@ -173,24 +169,27 @@ function searchNames() {
     }
   }
 
+  // replace page buttons
   removePageButtons();
   let numberOfButtons = howManyPages(cleanStudentNames.length);
   createPageButtons(numberOfButtons);
 
-  // if there are now search results, hide the error
+  // if there are search results, hide error message
   if (cleanStudentNames.length !== 0) {
     hideErrorMsg();
   }
 
   // logic to control linkage between page buttons and student arrays
-  let search = document.querySelectorAll(".pagination ul li a");
+  // if there is an active search, buttons get .search
+  // otherwise, remove .search
+  let searchBtns = document.querySelectorAll(".pagination ul li a");
   if (searchString === "") {
-    for (let i = 0; i < search.length; i++) {
-      search[i].classList.remove("search");
+    for (let i = 0; i < searchBtns.length; i++) {
+      searchBtns[i].classList.remove("search");
     }
   } else {
-    for (let i = 0; i < search.length; i++) {
-      search[i].classList.add("search");
+    for (let i = 0; i < searchBtns.length; i++) {
+      searchBtns[i].classList.add("search");
     }
   }
 
@@ -200,7 +199,7 @@ function searchNames() {
 // ========================================================================
 function removePageButtons() {
   // destroy page buttons so they dont accumulate
-  let removeButtons = document.querySelector(".pagination");
+  const removeButtons = document.querySelector(".pagination");
   removeButtons.parentNode.removeChild(removeButtons);
 }
 
@@ -218,11 +217,14 @@ function hideErrorMsg() {
 
 // ========================================================================
 function createErrorMsg() {
-  // create the error <div> and insert in DOM @ startup, but set to display none
-  // console.log("Error Message Coming Soon!");
-  let errorMarkup = `<div class="error">
+  // create error <div> and insert @ startup -  set display none
+
+  const errorMarkup = `<div class="error">
    <p>After an exhaustive search, using alot of valuable computer resources,</p>
-   <p>nothing could be found. We even asked Siri. Sorry about that.</p>
+   <p>nothing could be found.</p>
+   <p>We even asked Siri.</p> 
+   <p>Sorry about that.</p>
+   <br>
    <p>Maybe try a different search?</p>
       </div>`;
 
@@ -230,16 +232,19 @@ function createErrorMsg() {
     .querySelector(".student-list")
     .insertAdjacentHTML("afterend", errorMarkup);
 
+  const error = document.querySelector(".error");
   // style the error msg programatically
-  document.querySelector(".error").style.color = "darkred";
-  document.querySelector(".error").style.fontSize = "2rem";
-  document.querySelector(".error").style.textAlign = "center";
-  document.querySelector(".error").style.display = "none";
+  error.style.color = "red";
+  error.style.fontSize = "2rem";
+  error.style.textAlign = "center";
+  error.style.display = "none";
+  error.style.border = "2px solid red";
+  error.style.padding = "7px";
 }
 
 // ========================================================================
 function main() {
-  colorCode();
+  // colorCode(); // TEMPORARY to observe list behavior
   createSearchButtons();
   let numberOfButtons = howManyPages(students.length);
   createPageButtons(numberOfButtons);
